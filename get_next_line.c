@@ -8,6 +8,8 @@ static char *extract_line(char *buffer)
 	i = 0;
 	while (buffer[i] != '\n' && buffer[i] != '\0')
 		i++;
+	if (buffer[i] == '\n')
+		i++;
 	line = malloc(sizeof(char) * (i + 1));
 	if (!line)
 		return (NULL);
@@ -17,21 +19,34 @@ static char *extract_line(char *buffer)
 		line[i] = buffer[i];
 		i++;
 	}
+	if (buffer[i] == '\n')
+	{
+		line[i] = '\n';
+		i++;
+	}
 	line[i] = '\0';
 	return (line);
 }
 
 static char *update_buffer(char *buffer)
 {
-	char *new_line;
-	char *new_buffer;
-	
-	new_line = ft_strchr(buffer, '\n');
-	if (!new_line)
-		return (NULL);
-	new_buffer = ft_strdup(new_line + 1);
-	free(buffer);
-	return (new_buffer);
+    char *new_line_pos;
+    char *new_buffer;
+    
+    new_line_pos = ft_strchr(buffer, '\n');
+    if (!new_line_pos)
+    {
+        free(buffer);
+        return (NULL);
+    }
+    new_buffer = ft_strdup(new_line_pos + 1);
+    if (!new_buffer)
+    {
+        free(buffer);
+        return (NULL);
+    }
+    free(buffer);
+    return (new_buffer);
 }
 
 char	*get_next_line(int fd)
@@ -49,30 +64,47 @@ char	*get_next_line(int fd)
 		if (!buffer)
 			buffer = ft_strdup(temp);
 		else
+		{
 			buffer = ft_strjoin(buffer, temp);
+			if (!buffer)
+			{
+				free(buffer);
+				return (NULL);
+			}
+		}
 		if (ft_strchr(buffer, '\n'))
 			break ;
 	}
-	if (bytes_read < 0 || (bytes_read == 0 && !buffer))
+	if (bytes_read < 0 || (bytes_read == 0 && (!buffer || buffer[0] == '\0')))
+	{
+		free(buffer);
 		return (NULL);
+	}
+	else if (bytes_read == 0 && !ft_strchr(buffer, '\n'))
+	{
+		line = ft_strdup(buffer);
+		free(buffer);
+		buffer = NULL;
+		return (line);
+	}
 	line = extract_line(buffer);
 	buffer = update_buffer(buffer);
 	return (line);
 }
 
-#include <stdio.h>
-#include <fcntl.h>
-int main()
-{
-	char *line;
-	int fd;
+// #include <stdio.h>
+// #include <fcntl.h>
+// int main()
+// {
+// 	char *line;
+// 	int fd;
 
-	fd = open("test.txt", O_RDONLY);
-	while ((line = get_next_line(fd)))
-	{
-		printf("%s\n", line);
-		free(line);
-	}
-	close(fd);
-	return (0);
-}
+// 	fd = open("test.txt", O_RDONLY);
+// 	while ((line = get_next_line(fd)))
+// 	{
+// 		printf("%s\n", line);
+// 		free(line);
+// 	}
+// 	close(fd);
+// 	return (0);
+// }

@@ -45,26 +45,27 @@ char	*ft_strdup(const char *s1)
 	return (str);
 }
 
-char *ft_strjoin(char *s1, char *s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
 	char	*str;
-	size_t	i;
-	size_t	j;
+	char	*ptr;
+	char	*s1_orig;
 
 	if (!s1 || !s2)
 		return (NULL);
-	str = ft_strdup(s1);
+	s1_orig = s1;
+	str = malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
 	if (!str)
-		return (NULL);
-	i = ft_strlen(str);
-	j = 0;
-	while (s2[j])
 	{
-		str[i] = s2[j];
-		i++;
-		j++;
+		free(s1_orig);
+		return (NULL);
 	}
-	str[i] = '\0';
-	free(s1);
+	ptr = str;
+	while (*s1)
+		*ptr++ = *s1++;
+	while (*s2)
+		*ptr++ = *s2++;
+	*ptr = '\0';
+	free(s1_orig);
 	return (str);
 }

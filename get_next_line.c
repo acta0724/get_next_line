@@ -1,9 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kiwasa <kiwasa@student.42.jp>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/03 04:11:35 by kiwasa            #+#    #+#             */
+/*   Updated: 2024/11/03 04:13:07 by kiwasa           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
-static char *extract_line(char *buffer)
+static char	*extract_line(char *buffer)
 {
-	char *line;
-	int i;
+	char	*line;
+	int		i;
 
 	i = 0;
 	while (buffer[i] != '\n' && buffer[i] != '\0')
@@ -28,25 +40,25 @@ static char *extract_line(char *buffer)
 	return (line);
 }
 
-static char *update_buffer(char *buffer)
+static char	*update_buffer(char *buffer)
 {
-    char *new_line_pos;
-    char *new_buffer;
-    
-    new_line_pos = ft_strchr(buffer, '\n');
-    if (!new_line_pos)
-    {
-        free(buffer);
-        return (NULL);
-    }
-    new_buffer = ft_strdup(new_line_pos + 1);
-    if (!new_buffer)
-    {
-        free(buffer);
-        return (NULL);
-    }
-    free(buffer);
-    return (new_buffer);
+	char	*new_line_pos;
+	char	*new_buffer;
+
+	new_line_pos = ft_strchr(buffer, '\n');
+	if (!new_line_pos)
+	{
+		free(buffer);
+		return (NULL);
+	}
+	new_buffer = ft_strdup(new_line_pos + 1);
+	if (!new_buffer)
+	{
+		free(buffer);
+		return (NULL);
+	}
+	free(buffer);
+	return (new_buffer);
 }
 
 char	*get_next_line(int fd)

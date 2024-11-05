@@ -66,3 +66,23 @@ char *ft_strjoin(char *s1, char *s2)
 	free(s1_orig);
 	return (str);
 }
+
+char	*append_to_buffer(char *buffer, char *temp, int bytes_read)
+{
+	char	*new_buffer;
+
+	temp[bytes_read] = '\0';
+	if (!buffer)
+		buffer = ft_strdup(temp);
+	else
+	{
+		new_buffer = ft_strjoin(buffer, temp);
+		if (!new_buffer)
+		{
+			free(buffer);
+			return (NULL);
+		}
+		buffer = new_buffer;
+	}
+	return (buffer);
+}

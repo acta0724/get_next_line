@@ -12,6 +12,26 @@
 
 #include "get_next_line.h"
 
+static char	*append_to_buffer(char *buffer, char *temp, int bytes_read)
+{
+	char	*new_buffer;
+
+	temp[bytes_read] = '\0';
+	if (!buffer)
+		buffer = ft_strdup(temp);
+	else
+	{
+		new_buffer = ft_strjoin(buffer, temp);
+		if (!new_buffer)
+		{
+			free(buffer);
+			return (NULL);
+		}
+		buffer = new_buffer;
+	}
+	return (buffer);
+}
+
 static char	*extract_line(char *buffer)
 {
 	char	*line;
@@ -72,18 +92,9 @@ char	*get_next_line(int fd)
 		return (NULL);
 	while ((bytes_read = read(fd, temp, BUFFER_SIZE)) > 0)
 	{
-		temp[bytes_read] = '\0';
-		if (!buffer)
-			buffer = ft_strdup(temp);
-		else
-		{
-			buffer = ft_strjoin(buffer, temp);
-			if (!buffer)
-			{
-				free(buffer);
-				return (NULL);
-			}
-		}
+		buffer = append_to_buffer(buffer, temp, bytes_read);
+		if(!buffer)
+			return (NULL);
 		if (ft_strchr(buffer, '\n'))
 			break ;
 	}
@@ -91,13 +102,6 @@ char	*get_next_line(int fd)
 	{
 		free(buffer);
 		return (NULL);
-	}
-	else if (bytes_read == 0 && !ft_strchr(buffer, '\n'))
-	{
-		line = ft_strdup(buffer);
-		free(buffer);
-		buffer = NULL;
-		return (line);
 	}
 	line = extract_line(buffer);
 	buffer = update_buffer(buffer);

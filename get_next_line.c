@@ -6,7 +6,7 @@
 /*   By: kiwasa <kiwasa@student.42.jp>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/03 04:11:35 by kiwasa            #+#    #+#             */
-/*   Updated: 2024/11/07 06:20:27 by kiwasa           ###   ########.fr       */
+/*   Updated: 2024/11/07 06:33:24 by kiwasa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ static char	*update_buffer(char *buffer, char *temp)
 {
 	char	*new_line_pos;
 	char	*new_buffer;
-	
+
 	free(temp);
 	new_line_pos = ft_strchr(buffer, '\n');
 	if (!new_line_pos)

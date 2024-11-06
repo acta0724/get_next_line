@@ -6,7 +6,7 @@
 /*   By: kiwasa <kiwasa@student.42.jp>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/03 04:11:35 by kiwasa            #+#    #+#             */
-/*   Updated: 2024/11/03 04:13:07 by kiwasa           ###   ########.fr       */
+/*   Updated: 2024/11/07 06:20:27 by kiwasa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,11 +60,12 @@ static char	*extract_line(char *buffer)
 	return (line);
 }
 
-static char	*update_buffer(char *buffer)
+static char	*update_buffer(char *buffer, char *temp)
 {
 	char	*new_line_pos;
 	char	*new_buffer;
-
+	
+	free(temp);
 	new_line_pos = ft_strchr(buffer, '\n');
 	if (!new_line_pos)
 	{
@@ -85,26 +86,28 @@ char	*get_next_line(int fd)
 {
 	static char	*buffer;
 	char		*line;
-	char		temp[BUFFER_SIZE + 1];
+	char		*temp;
 	int			bytes_read;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	while ((bytes_read = read(fd, temp, BUFFER_SIZE)) > 0)
+	temp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!temp)
+		return (NULL);
+	bytes_read = read(fd, temp, BUFFER_SIZE);
+	while (bytes_read > 0)
 	{
 		buffer = append_to_buffer(buffer, temp, bytes_read);
-		if(!buffer)
-			return (NULL);
+		if (!buffer)
+			return (free(temp), NULL);
 		if (ft_strchr(buffer, '\n'))
 			break ;
+		bytes_read = read(fd, temp, BUFFER_SIZE);
 	}
 	if (bytes_read < 0 || (bytes_read == 0 && (!buffer || buffer[0] == '\0')))
-	{
-		free(buffer);
-		return (NULL);
-	}
+		return (free(buffer), free(temp), NULL);
 	line = extract_line(buffer);
-	buffer = update_buffer(buffer);
+	buffer = update_buffer(buffer, temp);
 	return (line);
 }
 

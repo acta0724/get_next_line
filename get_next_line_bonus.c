@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kiwasa <kiwasa@student.42.jp>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/07 03:03:39 by kiwasa            #+#    #+#             */
+/*   Updated: 2024/11/07 06:12:10 by kiwasa           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line_bonus.h"
 
 static t_fd_list	*get_fd_list(t_fd_list **fd_list, int fd)
@@ -21,11 +33,13 @@ static t_fd_list	*get_fd_list(t_fd_list **fd_list, int fd)
 	return (new_fd);
 }
 
-static char	*free_fd_list(t_fd_list **fd_list, int fd)
+static char	*free_fd_list(t_fd_list **fd_list, int fd, char *temp)
 {
 	t_fd_list	*current;
 	t_fd_list	*previous;
 
+	if (temp)
+		free(temp);
 	current = *fd_list;
 	previous = NULL;
 	while (current)
@@ -74,51 +88,49 @@ static char	*extract_line(char *buffer)
 	return (line);
 }
 
-static char *update_buffer(char *buffer)
+static char	*update_buffer(char *buffer, char *temp)
 {
-    size_t  i;
-    char    *new_buffer;
+	size_t	i;
+	char	*new_buffer;
 
+	if (temp)
+		free(temp);
 	i = 0;
-    while (buffer[i] && buffer[i] != '\n')
-        i++;
-    if (!buffer[i])
-    {
+	while (buffer[i] && buffer[i] != '\n')
+		i++;
+	if (!buffer[i])
+	{
 		free(buffer);
-        return (NULL);
-    }
-    new_buffer = ft_strdup(buffer + i + 1);
-    free(buffer);
-    return (new_buffer);
+		return (NULL);
+	}
+	new_buffer = ft_strdup(buffer + i + 1);
+	free(buffer);
+	return (new_buffer);
 }
 
 char	*get_next_line(int fd)
 {
 	static t_fd_list	*head;
 	t_fd_list			*current;
-	char				*line;
-	char				temp[BUFFER_SIZE + 1];
-	int					bytes_read;
+	t_gnl_vars			vars;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || !get_fd_list(&head, fd))
 		return (NULL);
 	current = get_fd_list(&head, fd);
-	if (!current)
+	vars.temp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!vars.temp)
 		return (NULL);
-	while ((bytes_read = read(fd, temp, BUFFER_SIZE)) > 0)
-	{
-		current->buffer = append_to_buffer(current->buffer, temp, bytes_read);
-		if (!current->buffer)
-			return (free_fd_list(&head, fd));
-		if (ft_strchr(current->buffer, '\n'))
-			break ;
-	}
-	if (bytes_read < 0 || (bytes_read == 0 && (!current->buffer || current->buffer[0] == '\0')))
-		return (free_fd_list(&head, fd));
-	line = extract_line(current->buffer);
-	current->buffer = update_buffer(current->buffer);
-	return (line);
+	if (read_and_store(fd, current, &vars) == -1)
+		return (free_fd_list(&head, fd, vars.temp));
+	if (vars.bytes < 0)
+		return (free_fd_list(&head, fd, vars.temp));
+	if (vars.bytes == 0 && (!current->buffer || current->buffer[0] == '\0'))
+		return (free_fd_list(&head, fd, vars.temp));
+	vars.line = extract_line(current->buffer);
+	current->buffer = update_buffer(current->buffer, vars.temp);
+	return (vars.line);
 }
+
 // #include <stdio.h>
 // #include <fcntl.h>
 // int main(int argc, char **argv)
